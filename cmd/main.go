@@ -140,6 +140,7 @@ func main() {
 		)
 		app.Run()
 		core := core.NewReserveCore(bc, config.ActivityStorage, config.ReserveAddress)
+		log.Println("Init server")
 		server := http.NewHTTPServer(
 			app, core,
 			config.MetricStorage,
@@ -148,8 +149,5 @@ func main() {
 			config.AuthEngine,
 		)
 		server.Run()
-
-		// verifi := verification.NewVerification(app, core, config.AuthEngine)
-		// verifi.RunVerification()
 	}
 }
