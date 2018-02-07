@@ -55,8 +55,8 @@ func GetConfigForDev() *Config {
 
 	// endpoint := "https://ropsten.infura.io"
 	// endpoint := "http://blockchain:8545"
-	endpoint := "https://kovan.infura.io"
-	// endpoint := "https://mainnet.infura.io"
+	// endpoint := "https://kovan.infura.io"
+	endpoint := "https://mainnet.infura.io"
 	bkendpoints := []string{
 		"https://mainnet.infura.io",
 	}
