@@ -117,8 +117,8 @@ func (self *Verification) GetPendingActivities(timepoint uint64) ([]common.Activ
 	return result, err
 }
 
-func (self *Verification) GetActivities(timepoint uint64) (common.ActivityRecord, error) {
-	result := common.ActivityRecord{}
+func (self *Verification) GetActivities(timepoint uint64) ([]common.ActivityRecord, error) {
+	result := []common.ActivityRecord{}
 	resp_body, err := self.GetResponse(
 		"GET",
 		BASE_URL+"/activities",
@@ -196,7 +196,7 @@ func (self *Verification) Withdraw(
 func (self *Verification) CheckPendingActivities(activityID common.ActivityID, timepoint uint64) {
 	pendingActivities, err := self.GetPendingActivities(timepoint)
 	if err != nil {
-		Error.Printf(err.Error())
+		Error.Println(err.Error())
 		return
 	}
 	available := false
@@ -210,14 +210,43 @@ func (self *Verification) CheckPendingActivities(activityID common.ActivityID, t
 		Error.Println("Deposit activity did not store")
 		return
 	}
+	Info.Println("Pending activities stored success")
 }
 
 func (self *Verification) CheckPendingAuthData(activityID common.ActivityID, timepoint uint64) {
-
+	authData, err := self.GetAuthData(timepoint)
+	if err != nil {
+		Error.Println(err.Error())
+	}
+	available := false
+	for _, pending := range authData.Data.PendingActivities {
+		if activityID == pending.ID {
+			available = true
+			break
+		}
+	}
+	if !available {
+		Error.Println("Activity cannot find in authdata pending activity")
+	}
+	Info.Println("Stored pending auth data success")
 }
 
 func (self *Verification) CheckActivities(activityID common.ActivityID, timepoint uint64) {
-
+	activities, err := self.GetActivities(timepoint)
+	if err != nil {
+		Error.Println(err.Error())
+	}
+	available := false
+	for _, activity := range activities {
+		if activity.ID == activityID {
+			available = true
+			break
+		}
+	}
+	if !available {
+		Error.Printf("Cannot find activity: %v", activityID)
+	}
+	Info.Printf("Activity %v stored successfully", activityID)
 }
 
 func (self *Verification) VerifyDeposit() error {
