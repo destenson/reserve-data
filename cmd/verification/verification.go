@@ -193,12 +193,38 @@ func (self *Verification) Withdraw(
 	return result.ID, nil
 }
 
+func (self *Verification) CheckPendingActivities(activityID common.ActivityID, timepoint uint64) {
+	pendingActivities, err := self.GetPendingActivities(timepoint)
+	if err != nil {
+		Error.Printf(err.Error())
+		return
+	}
+	available := false
+	for _, pending := range pendingActivities {
+		if pending.ID == activityID {
+			available = true
+			break
+		}
+	}
+	if !available {
+		Error.Println("Deposit activity did not store")
+		return
+	}
+}
+
+func (self *Verification) CheckPendingAuthData(activityID common.ActivityID, timepoint uint64) {
+
+}
+
+func (self *Verification) CheckActivities(activityID common.ActivityID, timepoint uint64) {
+
+}
+
 func (self *Verification) VerifyDeposit() error {
 	var err error
 	timepoint := common.GetTimepoint()
 	token := "ETH"
 	amount := hexutil.EncodeUint64(1)
-	// deposit to exchanges
 	Info.Println("Start deposit to exchanges")
 	for _, exchange := range self.exchanges {
 		activityID, err := self.Deposit(exchange, token, amount, timepoint)
@@ -207,39 +233,9 @@ func (self *Verification) VerifyDeposit() error {
 			return err
 		}
 		Info.Printf("Deposit id: %s", activityID)
-		// check deposit data from api
-		// pending activities
-		pendingActivities, err := self.GetPendingActivities(timepoint)
-		if err != nil {
-			Error.Println(err.Error())
-			return err
-		}
-		Info.Printf("Pending activities after deposit: %v", pendingActivities)
-		// check if activities available in pending
-		available := false
-		for _, pending := range pendingActivities {
-			if pending.ID == activityID {
-				available = true
-				break
-			}
-		}
-		if !available {
-			Error.Println("Deposit activity did not store")
-		}
-		// authdata
-		authData, err := self.GetAuthData(timepoint)
-		if err != nil {
-			Error.Println(err.Error())
-			return err
-		}
-		Info.Printf("Auth data after deposit: %v", authData)
-		// activities
-		activities, err := self.GetActivities(timepoint)
-		if err != nil {
-			Error.Println(err.Error())
-			return err
-		}
-		Info.Printf("Activity data after deposit: %v", activities)
+		go self.CheckPendingActivities(activityID, timepoint)
+		go self.CheckPendingAuthData(activityID, timepoint)
+		go self.CheckActivities(activityID, timepoint)
 	}
 	return err
 }
@@ -256,38 +252,9 @@ func (self *Verification) VerifyWithdraw() error {
 			return err
 		}
 		Info.Printf("Withdraw ID: %s", activityID)
-		// check withdraw data from api
-		// pending activities
-		pendingActivities, err := self.GetPendingActivities(timepoint)
-		if err != nil {
-			Error.Println(err.Error())
-			return err
-		}
-		Info.Printf("Pending activities after withdraw: %v", pendingActivities)
-		available := false
-		for _, pending := range pendingActivities {
-			if pending.ID == activityID {
-				available = true
-				break
-			}
-		}
-		if !available {
-			Error.Println("Withdraw activity did not store")
-		}
-		// authdata
-		authdata, err := self.GetAuthData(timepoint)
-		if err != nil {
-			Error.Println(err.Error())
-			return err
-		}
-		Info.Printf("Auth data after withdraw: %s", authdata)
-		// activities
-		activities, err := self.GetActivities(timepoint)
-		if err != nil {
-			Error.Println(err.Error())
-			return err
-		}
-		Info.Printf("Activities after withdraw: %v", activities)
+		go self.CheckPendingActivities(activityID, timepoint)
+		go self.CheckPendingAuthData(activityID, timepoint)
+		go self.CheckPendingAuthData(activityID, timepoint)
 	}
 	return err
 }
