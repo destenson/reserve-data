@@ -292,7 +292,7 @@ func (self *Verification) RunVerification() {
 	InitLogger(ioutil.Discard, os.Stdout, os.Stdout, os.Stderr)
 	Info.Println("Start verification")
 	self.VerifyDeposit()
-	// self.VerifyWithdraw()
+	self.VerifyWithdraw()
 }
 
 func NewVerification(
